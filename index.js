@@ -714,6 +714,7 @@ addEventListener("keydown", function (event) {
     showPrevious();
   } else if (event.key === " ") {
     showPreOptimization();
+    event.preventDefault(); // prevent space from triggering last-clicked button
   } else if (event.key === "ArrowRight") {
     showNext();
   } else if (event.key === "End") {
