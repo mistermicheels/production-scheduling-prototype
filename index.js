@@ -688,8 +688,10 @@ function showFirst() {
 }
 
 function showPrevious() {
-  currentScheduleHistoryIndex--;
-  renderPage();
+  if (currentScheduleHistoryIndex > 0) {
+    currentScheduleHistoryIndex--;
+    renderPage();
+  }
 }
 
 function showPreOptimization() {
@@ -698,8 +700,10 @@ function showPreOptimization() {
 }
 
 function showNext() {
-  currentScheduleHistoryIndex++;
-  renderPage();
+  if (currentScheduleHistoryIndex < scheduleHistory.length - 1) {
+    currentScheduleHistoryIndex++;
+    renderPage();
+  }
 }
 
 function showLast() {
