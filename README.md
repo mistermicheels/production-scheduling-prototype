@@ -1,11 +1,13 @@
 Project status:
 
--   🛑 Not actively maintained
--   🔒 Not looking for code contributions from other developers
+- 🛑 Not actively maintained
+- 🔒 Not looking for code contributions from other developers
 
 # production-scheduling-prototype
 
-This is prototype of a production scheduler for a chocolate factory. It generates random orders, schedules them on specific machines and visualizes the result on a Gantt chart.
+This is a prototype of a production scheduler for a chocolate factory. It generates random orders, schedules them on specific machines and visualizes the result on a Gantt chart.
+
+[Click here to open it.](https://production-scheduling-prototype.pages.dev/)
 
 ## The scheduling problem
 

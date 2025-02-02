@@ -2,8 +2,95 @@
 <html>
   <head>
     <script src="index.js" defer></script>
+    <style>
+      body {
+        font-family: Arial, Helvetica, sans-serif;
+      }
+
+      li {
+        margin-bottom: 0.5rem;
+      }
+
+      td {
+        padding: 0px;
+        white-space: pre; /* prevent wrapping */
+      }
+
+      .chocolate-dark {
+        background-color: saddleBrown;
+        color: white;
+      }
+
+      .chocolate-milk {
+        background-color: chocolate;
+        color: white;
+      }
+
+      .chocolate-white {
+        background-color: moccasin;
+      }
+
+      .with-nuts {
+        background-image: repeating-linear-gradient(
+          -45deg,
+          gold,
+          gold 5px,
+          transparent 5px,
+          transparent 10px
+        );
+      }
+
+      .switchover-costly {
+        background-color: orange;
+      }
+
+      .switchover-normal {
+        background-color: gainsboro;
+      }
+
+      .order-overdue {
+        border: 5px solid red;
+      }
+    </style>
   </head>
+
   <body style="overflow: hidden">
+    <p>
+      This is a prototype of a production scheduler for a chocolate factory (see
+      <a
+        href="https://github.com/mistermicheels/production-scheduling-prototype"
+        >GitHub repo</a
+      >
+      for more details).
+    </p>
+    <ul>
+      <li>
+        Types of chocolate: <span class="chocolate-dark">dark</span>,
+        <span class="chocolate-milk">milk</span> and
+        <span class="chocolate-white">white</span>, potentially
+        <span class="with-nuts">with nuts</span>
+      </li>
+      <li>Machine types: A (slower) and B (faster, can handle nuts)</li>
+      <li>
+        Switchover between orders:
+        <span class="switchover-costly">costly</span> (thorough cleaning needed)
+        or <span class="switchover-normal">normal</span>
+        <ul>
+          <li>
+            Thorough cleaning needed when switching from non-white to white or
+            from nuts to no nuts
+          </li>
+        </ul>
+      </li>
+      <li>
+        Main goal: prevent orders from being
+        <span class="order-overdue">overdue</span> or minimize time they are
+        overdue
+      </li>
+      <li>
+        Further goals: minimize schedule length, minimize costly switchovers
+      </li>
+    </ul>
     <button type="button" id="firstButton" onclick="showFirst()" disabled>
       First
     </button>
@@ -24,11 +111,28 @@
     <button type="button" id="lastButton" onclick="showLast()" disabled>
       Last
     </button>
+    <span
+      title="Pre-optimization: after initial schedule construction, before iterative optimization
+
+Keyboard shortcuts:
+First [Home]
+Previous [Left]
+Pre-optimization [Space]
+Next [Right]
+Last [End]"
+      >ℹ️</span
+    >
     <table id="ganttChart"></table>
-    <p id="totalTardiness"></p>
-    <p id="makespan"></p>
-    <p id="costlySwitchovers"></p>
-    <p id="machinesAtMakespan"></p>
-    <p id="optimizationIteration"></p>
+
+    <ul>
+      <li>Orders scheduled: <span id="ordersScheduled"></span></li>
+      <li>Optimization iteration: <span id="optimizationIteration"></span></li>
+      <li>
+        Total tardiness (total time overdue): <span id="totalTardiness"></span>
+      </li>
+      <li>Makespan (schedule length): <span id="makespan"></span></li>
+      <li>Costly switchovers: <span id="costlySwitchovers"></span></li>
+      <li>Machines at makespan: <span id="machinesAtMakespan"></span></li>
+    </ul>
   </body>
 </html>

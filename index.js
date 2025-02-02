@@ -1,7 +1,7 @@
 /**
  * @typedef {{ color: string, allergens: boolean }} Product
  * @typedef {{ name: string, timePerUnit: Map<Product, number> }} Machine
- * @typedef {{ name: string, product: Product, quantity: number, due: number }} Order
+ * @typedef {{ product: Product, quantity: number, due: number }} Order
  * @typedef {Map<Machine, Order[]>} Schedule
  *
  * @typedef {{ type: "order", order: Order, duration: number, end: number }} DetailedScheduleOrder
@@ -70,7 +70,6 @@ const orders = [
   ...Array(150)
     .fill(undefined)
     .map(() => ({
-      name: "",
       product: Object.values(products)[Math.floor(Math.random() * 3)], // without nuts
       quantity: Math.floor(Math.random() * 10) + 1,
       due: Math.floor(Math.random() * 1000) + 1,
@@ -78,7 +77,6 @@ const orders = [
   ...Array(50)
     .fill(undefined)
     .map(() => ({
-      name: "",
       product: Object.values(products)[Math.floor(Math.random() * 3) + 3], // with nuts
       quantity: Math.floor(Math.random() * 10) + 1,
       due: Math.floor(Math.random() * 1000) + 1,
@@ -546,31 +544,36 @@ setTimeout(optimizeSchedule);
 function renderScores() {
   const historyEntry = scheduleHistory[currentScheduleHistoryIndex];
 
-  document.getElementById(
-    "totalTardiness"
-  ).textContent = `Total tardiness (total time overdue): ${historyEntry.score.totalTardiness}`;
+  const numberOrdersScheduled = Math.min(
+    currentScheduleHistoryIndex + 1,
+    orders.length
+  );
 
   document.getElementById(
-    "costlySwitchovers"
-  ).textContent = `Costly switchovers: ${historyEntry.score.costlySwitchovers}`;
+    "ordersScheduled"
+  ).textContent = `${numberOrdersScheduled}/${orders.length}`;
+
+  document.getElementById("optimizationIteration").textContent = `${
+    currentScheduleHistoryIndex > lastPreOptimizationScheduleHistoryIndex
+      ? currentScheduleHistoryIndex - lastPreOptimizationScheduleHistoryIndex
+      : "/"
+  }`;
+
+  document.getElementById(
+    "totalTardiness"
+  ).textContent = `${historyEntry.score.totalTardiness}`;
 
   document.getElementById(
     "makespan"
-  ).textContent = `Makespan (schedule length): ${historyEntry.score.makespan}`;
+  ).textContent = `${historyEntry.score.makespan}`;
+
+  document.getElementById(
+    "costlySwitchovers"
+  ).textContent = `${historyEntry.score.costlySwitchovers}`;
 
   document.getElementById(
     "machinesAtMakespan"
-  ).textContent = `Machines at makespan: ${historyEntry.score.machinesAtMakespan}`;
-
-  if (currentScheduleHistoryIndex > lastPreOptimizationScheduleHistoryIndex) {
-    document.getElementById(
-      "optimizationIteration"
-    ).textContent = `Optimization iteration: ${
-      currentScheduleHistoryIndex - lastPreOptimizationScheduleHistoryIndex
-    }`;
-  } else {
-    document.getElementById("optimizationIteration").textContent = "";
-  }
+  ).textContent = `${historyEntry.score.machinesAtMakespan}`;
 }
 
 function renderSchedule() {
@@ -585,20 +588,19 @@ function renderSchedule() {
 
   const timeLength = 800;
 
-  const topRow = ganttChart.insertRow();
-  topRow.insertCell().style.width = "50px";
+  const spacerRow = ganttChart.insertRow();
+  spacerRow.insertCell();
 
   for (let i = 0; i < timeLength; i++) {
-    const spacerCell = topRow.insertCell();
-    spacerCell.style.width = "2px";
+    spacerRow.insertCell();
   }
 
   const timeRow = ganttChart.insertRow();
-  timeRow.insertCell().style.width = "50px";
+  timeRow.insertCell();
 
-  for (let i = 0; i < timeLength; i = i + 10) {
+  for (let i = 0; i < timeLength; i = i + 50) {
     const timeBlockCell = timeRow.insertCell();
-    timeBlockCell.colSpan = 10;
+    timeBlockCell.colSpan = 50;
     timeBlockCell.textContent = i.toString();
   }
 
@@ -615,33 +617,30 @@ function renderSchedule() {
       endTime = endTime + entry.duration;
 
       if (entry.type === "switchover") {
-        entryCell.title = `Costly:${entry.costly}\nDuration:${entry.duration}`;
+        entryCell.title = `Duration:${entry.duration}\nEnd:${endTime}`;
 
         if (entry.costly) {
-          entryCell.style.backgroundColor = "orange";
+          entryCell.classList.add("switchover-costly");
         } else {
-          entryCell.style.backgroundColor = "gainsboro";
+          entryCell.classList.add("switchover-normal");
         }
       } else {
-        entryCell.textContent = entry.order.name;
-        entryCell.title = `Allergens:${entry.order.product.allergens}\nDuration:${entry.duration}\nDue:${entry.order.due}\nEnd:${endTime}`;
+        entryCell.title = `Duration:${entry.duration}\nDue:${entry.order.due}\nEnd:${endTime}`;
 
         if (entry.order.product.color === colors.dark) {
-          entryCell.style.color = "white";
-          entryCell.style.backgroundColor = "saddleBrown";
+          entryCell.classList.add("chocolate-dark");
         } else if (entry.order.product.color === colors.milk) {
-          entryCell.style.color = "white";
-          entryCell.style.backgroundColor = "chocolate";
+          entryCell.classList.add("chocolate-milk");
         } else {
-          entryCell.style.backgroundColor = "moccasin";
+          entryCell.classList.add("chocolate-white");
         }
 
         if (entry.order.product.allergens) {
-          entryCell.style.background = `repeating-linear-gradient( -45deg, gold, gold 5px, ${entryCell.style.backgroundColor} 5px, ${entryCell.style.backgroundColor} 20px )`;
+          entryCell.classList.add("with-nuts");
         }
 
         if (endTime > entry.order.due) {
-          entryCell.style.border = "8px solid red";
+          entryCell.classList.add("order-overdue");
         }
       }
     }
