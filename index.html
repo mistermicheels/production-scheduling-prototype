@@ -11,6 +11,11 @@
         margin-bottom: 0.5rem;
       }
 
+      .hint {
+        font-size: smaller;
+        font-style: italic;
+      }
+
       td {
         padding: 0px;
         white-space: pre; /* prevent wrapping */
@@ -54,7 +59,7 @@
     </style>
   </head>
 
-  <body style="overflow: hidden">
+  <body>
     <p>
       This is a prototype of a production scheduler for a chocolate factory (see
       <a
@@ -91,37 +96,60 @@
         Further goals: minimize schedule length, minimize costly switchovers
       </li>
     </ul>
-    <button type="button" id="firstButton" onclick="showFirst()" disabled>
+
+    <p>
+      <strong>Generated schedule</strong>
+      <span class="hint"
+        >(use buttons to step through schedule generation process)</span
+      >
+    </p>
+
+    <button
+      type="button"
+      id="firstButton"
+      title="Keyboard shortcut: [Home]"
+      onclick="showFirst()"
+      disabled
+    >
       First
     </button>
-    <button type="button" id="previousButton" onclick="showPrevious()" disabled>
+    <button
+      type="button"
+      id="previousButton"
+      title="Keyboard shortcut: [Left arrow]"
+      onclick="showPrevious()"
+      disabled
+    >
       Previous
     </button>
     <button
       type="button"
       id="preOptimizationButton"
+      title="Keyboard shortcut: [Space]"
       onclick="showPreOptimization()"
       disabled
     >
-      Pre-optimization
+      Before iterative optimization
     </button>
-    <button type="button" id="nextButton" onclick="showNext()" disabled>
+    <button
+      type="button"
+      id="nextButton"
+      title="Keyboard shortcut: [Right arrow]"
+      onclick="showNext()"
+      disabled
+    >
       Next
     </button>
-    <button type="button" id="lastButton" onclick="showLast()" disabled>
+    <button
+      type="button"
+      id="lastButton"
+      title="Keyboard shortcut: [End]"
+      onclick="showLast()"
+      disabled
+    >
       Last
     </button>
-    <span
-      title="Pre-optimization: after initial schedule construction, before iterative optimization
-
-Keyboard shortcuts:
-First [Home]
-Previous [Left]
-Pre-optimization [Space]
-Next [Right]
-Last [End]"
-      >ℹ️</span
-    >
+    <span class="hint">(hover for keyboard shortcuts)</span>
     <table id="ganttChart"></table>
 
     <ul>
