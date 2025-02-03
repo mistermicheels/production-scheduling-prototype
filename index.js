@@ -1,5 +1,5 @@
 /**
- * @typedef {{ color: string, allergens: boolean }} Product
+ * @typedef {{ color: string, nuts: boolean }} Product
  * @typedef {{ name: string, timePerUnit: Map<Product, number> }} Machine
  * @typedef {{ product: Product, quantity: number, due: number }} Order
  * @typedef {Map<Machine, Order[]>} Schedule
@@ -23,12 +23,12 @@ const colors = {
 
 /** @type {{ [key: string]: Product }}} */
 const products = {
-  dark: { color: colors.dark, allergens: false },
-  milk: { color: colors.milk, allergens: false },
-  white: { color: colors.white, allergens: false },
-  darkWithNuts: { color: colors.dark, allergens: true },
-  milkWithNuts: { color: colors.milk, allergens: true },
-  whiteWithNuts: { color: colors.white, allergens: true },
+  dark: { color: colors.dark, nuts: false },
+  milk: { color: colors.milk, nuts: false },
+  white: { color: colors.white, nuts: false },
+  darkWithNuts: { color: colors.dark, nuts: true },
+  milkWithNuts: { color: colors.milk, nuts: true },
+  whiteWithNuts: { color: colors.white, nuts: true },
 };
 
 /** @type {Machine[]} */
@@ -65,21 +65,40 @@ const machinesPerProduct = new Map(
   ])
 );
 
+/**
+ * @param {{ nuts: boolean }} options
+ */
+function getRandomProduct({ nuts }) {
+  const relevantProducts = Object.values(products).filter(
+    (product) => product.nuts === nuts
+  );
+
+  return relevantProducts[Math.floor(Math.random() * relevantProducts.length)];
+}
+
+function getRandomOrderQuantity() {
+  return Math.floor(Math.random() * 10) + 1;
+}
+
+function getRandomOrderDueDate() {
+  return Math.floor(Math.random() * 1000) + 1;
+}
+
 /** @type {Order[]} */
 const orders = [
   ...Array(150)
     .fill(undefined)
     .map(() => ({
-      product: Object.values(products)[Math.floor(Math.random() * 3)], // without nuts
-      quantity: Math.floor(Math.random() * 10) + 1,
-      due: Math.floor(Math.random() * 1000) + 1,
+      product: getRandomProduct({ nuts: false }),
+      quantity: getRandomOrderQuantity(),
+      due: getRandomOrderDueDate(),
     })),
   ...Array(50)
     .fill(undefined)
     .map(() => ({
-      product: Object.values(products)[Math.floor(Math.random() * 3) + 3], // with nuts
-      quantity: Math.floor(Math.random() * 10) + 1,
-      due: Math.floor(Math.random() * 1000) + 1,
+      product: getRandomProduct({ nuts: true }),
+      quantity: getRandomOrderQuantity(),
+      due: getRandomOrderDueDate(),
     })),
 ];
 
@@ -125,7 +144,7 @@ function getSwitchoverBetweenOrders(currentOrder, nextOrder) {
     nextOrder.product.color === colors.white;
 
   const switchToAllergenFree =
-    currentOrder.product.allergens && !nextOrder.product.allergens;
+    currentOrder.product.nuts && !nextOrder.product.nuts;
 
   if (expensiveColorSwitch || switchToAllergenFree) {
     return { duration: 25, costly: true };
@@ -635,7 +654,7 @@ function renderSchedule() {
           entryCell.classList.add("chocolate-white");
         }
 
-        if (entry.order.product.allergens) {
+        if (entry.order.product.nuts) {
           entryCell.classList.add("with-nuts");
         }
 
