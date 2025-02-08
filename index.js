@@ -567,6 +567,37 @@ function optimizeSchedule() {
   }
 }
 
+// SET UP REFERENCES TO UI ELEMENTS
+
+const firstButton = /** @type {HTMLButtonElement} */ (
+  document.getElementById("firstButton")
+);
+const previousButton = /** @type {HTMLButtonElement} */ (
+  document.getElementById("previousButton")
+);
+const preOptimizationButton = /** @type {HTMLButtonElement} */ (
+  document.getElementById("preOptimizationButton")
+);
+const nextButton = /** @type {HTMLButtonElement} */ (
+  document.getElementById("nextButton")
+);
+const lastButton = /** @type {HTMLButtonElement} */ (
+  document.getElementById("lastButton")
+);
+
+const ganttChart = /** @type {HTMLTableElement} */ (
+  document.getElementById("ganttChart")
+);
+
+const ordersScheduledOutput = document.getElementById("ordersScheduled");
+const optimizationIterationOutput = document.getElementById(
+  "optimizationIteration"
+);
+const totalTardinessOutput = document.getElementById("totalTardiness");
+const makespanOutput = document.getElementById("makespan");
+const costlySwitchoversOutput = document.getElementById("costlySwitchovers");
+const machinesAtMakespanOutput = document.getElementById("machinesAtMakespan");
+
 // RUN CONSTRUCTION ALGORITHM AND ITERATIVE OPTIMIZATION
 
 let lastPreOptimizationScheduleHistoryIndex;
@@ -597,40 +628,23 @@ function renderScores() {
     orders.length
   );
 
-  document.getElementById(
-    "ordersScheduled"
-  ).textContent = `${numberOrdersScheduled}/${orders.length}`;
+  ordersScheduledOutput.textContent = `${numberOrdersScheduled}/${orders.length}`;
 
-  document.getElementById("optimizationIteration").textContent = `${
+  optimizationIterationOutput.textContent = `${
     currentScheduleHistoryIndex > lastPreOptimizationScheduleHistoryIndex
       ? currentScheduleHistoryIndex - lastPreOptimizationScheduleHistoryIndex
       : "/"
   }`;
 
-  document.getElementById(
-    "totalTardiness"
-  ).textContent = `${historyEntry.score.totalTardiness}`;
-
-  document.getElementById(
-    "makespan"
-  ).textContent = `${historyEntry.score.makespan}`;
-
-  document.getElementById(
-    "costlySwitchovers"
-  ).textContent = `${historyEntry.score.costlySwitchovers}`;
-
-  document.getElementById(
-    "machinesAtMakespan"
-  ).textContent = `${historyEntry.score.machinesAtMakespan}`;
+  totalTardinessOutput.textContent = `${historyEntry.score.totalTardiness}`;
+  makespanOutput.textContent = `${historyEntry.score.makespan}`;
+  costlySwitchoversOutput.textContent = `${historyEntry.score.costlySwitchovers}`;
+  machinesAtMakespanOutput.textContent = `${historyEntry.score.machinesAtMakespan}`;
 }
 
 function renderSchedule() {
   const historyEntry = scheduleHistory[currentScheduleHistoryIndex];
   const detailedSchedule = calculateDetailedSchedule(historyEntry.schedule);
-
-  const ganttChart = /** @type {HTMLTableElement} */ (
-    document.getElementById("ganttChart")
-  );
 
   ganttChart.innerHTML = "";
 
@@ -698,22 +712,6 @@ function renderSchedule() {
 function updateButtonStates() {
   const previousPossible = currentScheduleHistoryIndex > 0;
   const nextPossible = currentScheduleHistoryIndex < scheduleHistory.length - 1;
-
-  const firstButton = /** @type {HTMLButtonElement} */ (
-    document.getElementById("firstButton")
-  );
-  const previousButton = /** @type {HTMLButtonElement} */ (
-    document.getElementById("previousButton")
-  );
-  const preOptimizationButton = /** @type {HTMLButtonElement} */ (
-    document.getElementById("preOptimizationButton")
-  );
-  const nextButton = /** @type {HTMLButtonElement} */ (
-    document.getElementById("nextButton")
-  );
-  const lastButton = /** @type {HTMLButtonElement} */ (
-    document.getElementById("lastButton")
-  );
 
   firstButton.disabled = !previousPossible;
   previousButton.disabled = !previousPossible;
