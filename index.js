@@ -378,17 +378,75 @@ function updateCurrentSchedule(newCurrentSchedule) {
   currentScheduleHistoryIndex++;
 }
 
-function getSortedOrders() {
+/**
+ * @param {{ leastEligibleMachinesFirst: boolean }} options
+ */
+function getSortedOrders({ leastEligibleMachinesFirst }) {
   return [...orders].sort((a, b) => {
     const numberMachinesA = machinesPerProduct.get(a.product).size;
     const numberMachinesB = machinesPerProduct.get(b.product).size;
 
-    if (numberMachinesA !== numberMachinesB) {
+    if (leastEligibleMachinesFirst && numberMachinesA !== numberMachinesB) {
       return numberMachinesA - numberMachinesB;
     }
 
     return a.due - b.due;
   });
+}
+
+/**
+ * @param {Order[]} sortedOrders
+ */
+function insertOrdersAtEndOnEarliestAvailableMachine(sortedOrders) {
+  for (const order of sortedOrders) {
+    let earliestMachineAvailability = Number.POSITIVE_INFINITY;
+    let earliestAvailableMachine;
+
+    for (const machine of machinesPerProduct.get(order.product)) {
+      const machineScore = currentScheduleScore.machineScores.get(machine);
+
+      if (machineScore.endTime < earliestMachineAvailability) {
+        earliestMachineAvailability = machineScore.endTime;
+        earliestAvailableMachine = machine;
+      }
+    }
+
+    const newSchedule = insertOrder(
+      currentSchedule,
+      order,
+      earliestAvailableMachine
+    );
+    updateCurrentSchedule(newSchedule);
+  }
+}
+
+/**
+ * @param {Order[]} sortedOrders
+ */
+function insertOrdersAtEndOnBestMachine(sortedOrders) {
+  for (const order of sortedOrders) {
+    /** @type {ScheduleScore} */
+    let bestScore = undefined;
+
+    /** @type {Schedule} */
+    let bestSchedule = undefined;
+
+    for (const machine of machinesPerProduct.get(order.product)) {
+      const newSchedule = insertOrder(currentSchedule, order, machine);
+
+      const newScore = calculateScheduleScore(newSchedule, {
+        previousScore: currentScheduleScore,
+        changedMachines: [machine],
+      });
+
+      if (!bestScore || isScoreImprovement(bestScore, newScore)) {
+        bestScore = newScore;
+        bestSchedule = newSchedule;
+      }
+    }
+
+    updateCurrentSchedule(bestSchedule);
+  }
 }
 
 /**
@@ -569,6 +627,32 @@ function optimizeSchedule() {
 
 // SET UP REFERENCES TO UI ELEMENTS
 
+const optionsForm = /** @type {HTMLFormElement} */ (
+  document.getElementById("optionsForm")
+);
+
+const generateNewOrdersButton = /** @type {HTMLButtonElement} */ (
+  document.getElementById("generateNewOrdersButton")
+);
+const orderSequenceFieldSet = /** @type {HTMLFieldSetElement} */ (
+  document.getElementById("orderSequenceFieldSet")
+);
+const orderSequenceRadioButtons = /** @type {RadioNodeList} */ (
+  optionsForm.elements["orderSequence"]
+);
+const insertionLocationFieldSet = /** @type {HTMLFieldSetElement} */ (
+  document.getElementById("insertionLocationFieldSet")
+);
+const insertionLocationRadioButtons = /** @type {RadioNodeList} */ (
+  optionsForm.elements["insertionLocation"]
+);
+const performIterativeOptimizationCheckbox = /** @type {HTMLInputElement} */ (
+  document.getElementById("iterativeOptimizationCheckbox")
+);
+const generateScheduleButton = /** @type {HTMLButtonElement} */ (
+  document.getElementById("generateScheduleButton")
+);
+
 const firstButton = /** @type {HTMLButtonElement} */ (
   document.getElementById("firstButton")
 );
@@ -603,20 +687,43 @@ const machinesAtMakespanOutput = document.getElementById("machinesAtMakespan");
 let lastPreOptimizationScheduleHistoryIndex;
 
 function generateSchedule() {
+  disableInteraction();
   initializeScheduleAndHistory();
 
-  const sortedOrders = getSortedOrders();
-  insertOrdersAtBestPosition(sortedOrders);
+  const orderSequence = orderSequenceRadioButtons.value;
+  const insertionLocation = insertionLocationRadioButtons.value;
+  const performIterativeOptimization =
+    performIterativeOptimizationCheckbox.checked;
+
+  const sortedOrders = getSortedOrders({
+    leastEligibleMachinesFirst: orderSequence === "leastMachines",
+  });
+
+  if (insertionLocation === "endEarliestAvailable") {
+    insertOrdersAtEndOnEarliestAvailableMachine(sortedOrders);
+  } else if (insertionLocation === "endBestSchedule") {
+    insertOrdersAtEndOnBestMachine(sortedOrders);
+  } else {
+    insertOrdersAtBestPosition(sortedOrders);
+  }
 
   lastPreOptimizationScheduleHistoryIndex = scheduleHistory.length - 1;
-  renderScores();
-  renderSchedule();
 
-  setTimeout(optimizeSchedule);
+  if (performIterativeOptimization) {
+    renderScores();
+    renderSchedule();
+    setTimeout(optimizeSchedule);
+  } else {
+    renderPage();
+  }
 }
 
-generateRandomOrders();
-generateSchedule();
+function generateFromScratch() {
+  generateRandomOrders();
+  generateSchedule();
+}
+
+generateFromScratch();
 
 // VISUALIZATION LOGIC
 
@@ -709,7 +816,26 @@ function renderSchedule() {
   }
 }
 
+function disableInteraction() {
+  generateNewOrdersButton.disabled = true;
+  orderSequenceFieldSet.disabled = true;
+  insertionLocationFieldSet.disabled = true;
+  performIterativeOptimizationCheckbox.disabled = true;
+  generateScheduleButton.disabled = true;
+  firstButton.disabled = true;
+  previousButton.disabled = true;
+  preOptimizationButton.disabled = true;
+  nextButton.disabled = true;
+  lastButton.disabled = true;
+}
+
 function updateButtonStates() {
+  generateNewOrdersButton.disabled = false;
+  orderSequenceFieldSet.disabled = false;
+  insertionLocationFieldSet.disabled = false;
+  performIterativeOptimizationCheckbox.disabled = false;
+  generateScheduleButton.disabled = false;
+
   const previousPossible = currentScheduleHistoryIndex > 0;
   const nextPossible = currentScheduleHistoryIndex < scheduleHistory.length - 1;
 

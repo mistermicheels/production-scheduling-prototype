@@ -36,6 +36,7 @@ The scheduler uses a two-phase algorithm.
 
 In the first phase an initial schedule is constructed by adding one order at a time, starting with the orders with the least eligible machines and the earliest due date.
 Each order is inserted in the best possible place in the current schedule (which may be before another already-scheduled order).
+The user interface also allows exploring a few simpler strategies for initial schedule construction.
 
 The second phase is an iterative optimization phase.
 In every iteration, the algorithm looks for the biggest improvement that can be achieved by moving one order or swapping two orders.

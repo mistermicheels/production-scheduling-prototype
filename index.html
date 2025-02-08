@@ -11,6 +11,18 @@
         margin-bottom: 0.5rem;
       }
 
+      details {
+        margin-bottom: 1rem;
+      }
+
+      summary {
+        font-weight: bold;
+      }
+
+      fieldset {
+        margin: 0.5rem 0rem;
+      }
+
       .hint {
         font-size: smaller;
         font-style: italic;
@@ -97,6 +109,119 @@
       </li>
     </ul>
 
+    <details>
+      <summary>Options</summary>
+
+      <form id="optionsForm">
+        <button
+          type="button"
+          id="generateNewOrdersButton"
+          onclick="generateFromScratch()"
+        >
+          Generate new random orders
+        </button>
+
+        <fieldset id="orderSequenceFieldSet">
+          <legend>
+            Which orders should be scheduled first during initial schedule
+            construction?
+          </legend>
+          <div>
+            <input
+              type="radio"
+              id="eddRadioButton"
+              name="orderSequence"
+              value="edd"
+            />
+            <label for="eddRadioButton"
+              ><strong>Earliest due date:</strong> start with the orders that
+              are due first</label
+            >
+          </div>
+          <div>
+            <input
+              type="radio"
+              id="leastMachinesRadioButton"
+              name="orderSequence"
+              value="leastMachines"
+              checked
+            />
+            <label for="leastMachinesRadioButton"
+              ><strong>Least eligible machines:</strong> give priority to orders
+              that can run on less machines</label
+            >
+          </div>
+        </fieldset>
+
+        <fieldset id="insertionLocationFieldSet">
+          <legend>
+            Where should orders be inserted during initial schedule
+            construction?
+          </legend>
+          <div>
+            <input
+              type="radio"
+              id="endEarliestAvailableRadioButton"
+              name="insertionLocation"
+              value="endEarliestAvailable"
+            />
+            <label for="endEarliestAvailableRadioButton"
+              ><strong>At end, earliest available machine:</strong> at the end
+              of the schedule, on the earliest available machine</label
+            >
+          </div>
+          <div>
+            <input
+              type="radio"
+              id="endBestScheduleRadioButton"
+              name="insertionLocation"
+              value="endBestSchedule"
+            />
+            <label for="endBestScheduleRadioButton"
+              ><strong>At end, best schedule:</strong> at the end of the
+              schedule, on the machine that results in the best overall
+              schedule</label
+            >
+          </div>
+          <div>
+            <input
+              type="radio"
+              id="anywhereBestScheduleRadioButton"
+              name="insertionLocation"
+              value="anywhereBestSchedule"
+              checked
+            />
+            <label for="anywhereBestScheduleRadioButton"
+              ><strong>Anywhere, best schedule: </strong> at any position
+              (potentially before an already-scheduled order) that results in
+              the best overall schedule</label
+            >
+          </div>
+        </fieldset>
+
+        <div>
+          <input
+            type="checkbox"
+            id="iterativeOptimizationCheckbox"
+            name="performIterativeOptimization"
+            checked
+          />
+          <label for="iterativeOptimizationCheckbox"
+            >Perform iterative optimization after initial schedule
+            construction</label
+          >
+        </div>
+
+        <button
+          type="button"
+          id="generateScheduleButton"
+          onclick="generateSchedule()"
+        >
+          Generate schedule
+        </button>
+      </form>
+    </details>
+
     <p>
       <strong>Generated schedule</strong>
       <span class="hint"
@@ -109,7 +234,6 @@
       id="firstButton"
       title="Keyboard shortcut: [Home]"
       onclick="showFirst()"
-      disabled
     >
       First
     </button>
@@ -118,7 +242,6 @@
       id="previousButton"
       title="Keyboard shortcut: [Left arrow]"
       onclick="showPrevious()"
-      disabled
     >
       Previous
     </button>
@@ -127,7 +250,6 @@
       id="preOptimizationButton"
       title="Keyboard shortcut: [Space]"
       onclick="showPreOptimization()"
-      disabled
     >
       Before iterative optimization
     </button>
@@ -136,7 +258,6 @@
       id="nextButton"
       title="Keyboard shortcut: [Right arrow]"
       onclick="showNext()"
-      disabled
     >
       Next
     </button>
@@ -145,7 +266,6 @@
       id="lastButton"
       title="Keyboard shortcut: [End]"
       onclick="showLast()"
-      disabled
     >
       Last
     </button>
