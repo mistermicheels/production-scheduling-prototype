@@ -65,6 +65,23 @@ const machinesPerProduct = new Map(
   ])
 );
 
+/** @type {Order[]} */
+let orders;
+
+/** @type {Schedule} */
+let currentSchedule;
+
+/** @type {ScheduleScore} */
+let currentScheduleScore;
+
+/** @type {{ schedule: Schedule, score: ScheduleScore }[]} */
+let scheduleHistory;
+
+/** @type {number} */
+let currentScheduleHistoryIndex;
+
+// INITIALIZATION LOGIC
+
 /**
  * @param {{ nuts: boolean }} options
  */
@@ -84,45 +101,44 @@ function getRandomOrderDueDate() {
   return Math.floor(Math.random() * 1000) + 1;
 }
 
-/** @type {Order[]} */
-const orders = [
-  ...Array(150)
-    .fill(undefined)
-    .map(() => ({
-      product: getRandomProduct({ nuts: false }),
-      quantity: getRandomOrderQuantity(),
-      due: getRandomOrderDueDate(),
-    })),
-  ...Array(50)
-    .fill(undefined)
-    .map(() => ({
-      product: getRandomProduct({ nuts: true }),
-      quantity: getRandomOrderQuantity(),
-      due: getRandomOrderDueDate(),
-    })),
-];
+function generateRandomOrders() {
+  orders = [
+    ...Array(150)
+      .fill(undefined)
+      .map(() => ({
+        product: getRandomProduct({ nuts: false }),
+        quantity: getRandomOrderQuantity(),
+        due: getRandomOrderDueDate(),
+      })),
+    ...Array(50)
+      .fill(undefined)
+      .map(() => ({
+        product: getRandomProduct({ nuts: true }),
+        quantity: getRandomOrderQuantity(),
+        due: getRandomOrderDueDate(),
+      })),
+  ];
+}
 
-/** @type {Schedule} */
-let currentSchedule = new Map(machines.map((machine) => [machine, []]));
+function initializeScheduleAndHistory() {
+  currentSchedule = new Map(machines.map((machine) => [machine, []]));
 
-/** @type {ScheduleScore} */
-let currentScheduleScore = {
-  totalTardiness: 0,
-  costlySwitchovers: 0,
-  makespan: 0,
-  machinesAtMakespan: 0,
-  machineScores: new Map(
-    machines.map((machine) => [
-      machine,
-      { totalTardiness: 0, costlySwitchovers: 0, endTime: 0 },
-    ])
-  ),
-};
+  currentScheduleScore = {
+    totalTardiness: 0,
+    costlySwitchovers: 0,
+    makespan: 0,
+    machinesAtMakespan: 0,
+    machineScores: new Map(
+      machines.map((machine) => [
+        machine,
+        { totalTardiness: 0, costlySwitchovers: 0, endTime: 0 },
+      ])
+    ),
+  };
 
-/** @type {{ schedule: Schedule, score: ScheduleScore }[]} */
-const scheduleHistory = [];
-
-let currentScheduleHistoryIndex = -1;
+  scheduleHistory = [];
+  currentScheduleHistoryIndex = -1;
+}
 
 // SCHEDULING LOGIC
 
@@ -550,13 +566,22 @@ function optimizeSchedule() {
 
 // RUN CONSTRUCTION ALGORITHM AND ITERATIVE OPTIMIZATION
 
-constructByLeastEligibleMachinesAndEarliestDueDateAndBestPosition();
+let lastPreOptimizationScheduleHistoryIndex;
 
-const lastPreOptimizationScheduleHistoryIndex = scheduleHistory.length - 1;
-renderScores();
-renderSchedule();
+function generateSchedule() {
+  initializeScheduleAndHistory();
 
-setTimeout(optimizeSchedule);
+  constructByLeastEligibleMachinesAndEarliestDueDateAndBestPosition();
+
+  lastPreOptimizationScheduleHistoryIndex = scheduleHistory.length - 1;
+  renderScores();
+  renderSchedule();
+
+  setTimeout(optimizeSchedule);
+}
+
+generateRandomOrders();
+generateSchedule();
 
 // VISUALIZATION LOGIC
 
