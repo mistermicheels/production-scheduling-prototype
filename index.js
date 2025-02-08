@@ -732,14 +732,18 @@ function showLast() {
 addEventListener("keydown", function (event) {
   if (event.key === "Home") {
     showFirst();
+    event.preventDefault(); // prevent Home from scrolling to the top
   } else if (event.key === "ArrowLeft") {
     showPrevious();
+    event.preventDefault(); // prevent Left Arrow from scrolling to the left
   } else if (event.key === " ") {
     showPreOptimization();
-    event.preventDefault(); // prevent space from triggering last-clicked button
+    event.preventDefault(); // prevent Space from scrolling down or triggering last-clicked button
   } else if (event.key === "ArrowRight") {
     showNext();
+    event.preventDefault(); // prevent Right Arrow from scrolling to the right
   } else if (event.key === "End") {
     showLast();
+    event.preventDefault(); // prevent End from scrolling to the bottom
   }
 });
