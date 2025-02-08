@@ -378,21 +378,24 @@ function updateCurrentSchedule(newCurrentSchedule) {
   currentScheduleHistoryIndex++;
 }
 
-function constructByLeastEligibleMachinesAndEarliestDueDateAndBestPosition() {
-  const ordersByLeastEligibleMachinesAndEarliestDueDate = [...orders].sort(
-    (a, b) => {
-      const numberMachinesA = machinesPerProduct.get(a.product).size;
-      const numberMachinesB = machinesPerProduct.get(b.product).size;
+function getSortedOrders() {
+  return [...orders].sort((a, b) => {
+    const numberMachinesA = machinesPerProduct.get(a.product).size;
+    const numberMachinesB = machinesPerProduct.get(b.product).size;
 
-      if (numberMachinesA !== numberMachinesB) {
-        return numberMachinesA - numberMachinesB;
-      }
-
-      return a.due - b.due;
+    if (numberMachinesA !== numberMachinesB) {
+      return numberMachinesA - numberMachinesB;
     }
-  );
 
-  for (const order of ordersByLeastEligibleMachinesAndEarliestDueDate) {
+    return a.due - b.due;
+  });
+}
+
+/**
+ * @param {Order[]} sortedOrders
+ */
+function insertOrdersAtBestPosition(sortedOrders) {
+  for (const order of sortedOrders) {
     /** @type {ScheduleScore} */
     let bestScore = undefined;
 
@@ -571,7 +574,8 @@ let lastPreOptimizationScheduleHistoryIndex;
 function generateSchedule() {
   initializeScheduleAndHistory();
 
-  constructByLeastEligibleMachinesAndEarliestDueDateAndBestPosition();
+  const sortedOrders = getSortedOrders();
+  insertOrdersAtBestPosition(sortedOrders);
 
   lastPreOptimizationScheduleHistoryIndex = scheduleHistory.length - 1;
   renderScores();
